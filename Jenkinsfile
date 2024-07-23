@@ -5,7 +5,7 @@ pipeline
  }
 environment
 {
-    SONAR_HTTP_URL='http://3.83.218.79:9000'
+    SONAR_HTTP_URL='http://44.204.67.177:9000'
     JFROG_REPO_URL="devops1947.jfrog.io"
     JFROG_REPO_NAME="docker-local"
 
@@ -136,17 +136,20 @@ environment
                 //}
 
         }
-        post
+    }
+    stage('Trigger upstream job')
+    {
+        steps
         {
-            success
+            script
             {
-                sh '''
-                echo "\n==========================================================================================\n"
-                echo "\n==================================IMAGE-PUSH-COMPLETED====================================\n"
-                echo "\n==========================================================================================\n"
-                '''
+                def envVariables = [
+                        [$class: 'StringParameterValue', name: 'IMAGE_TAG', value: "${IMAGE_TAG}"]
+                    ]
+                // Trigger the downstream job and pass environment variables as parameters
+                    build job: 'netflix_cd_deploy_job', parameters: envVariables, propagate: true
             }
         }
-    }
+    }    
  }
 }
